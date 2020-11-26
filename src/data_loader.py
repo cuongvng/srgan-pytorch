@@ -8,7 +8,7 @@ import numpy as np
 class DIV2K(Dataset):
 	def __init__(self, data_dir):
 		# Get all paths of images inside `data_dir` into a list
-		pattern = os.path.join(data_dir, "*.png")
+		pattern = os.path.join(data_dir, "**/*.png")
 		self.file_paths = glob.glob(pattern, recursive=True)
 
 	def __len__(self):
