@@ -20,5 +20,13 @@ class DIV2K(Dataset):
 
 	def load_img(self, file_path):
 		img = Image.open(file_path)
-		img_data = np.array(img.getdata())
+		img_data = np.array(img.getdata()).reshape((3, img.size[0], img.size[1]))
 		return torch.tensor(img_data, dtype=torch.float32)
+
+def test():
+	data = DIV2K(data_dir="../DIV2K/DIV2K_train_LR_bicubic/X4")
+	print(data[3].shape)
+	print(data[5].shape)
+
+if __name__ == "__main__":
+	test()
