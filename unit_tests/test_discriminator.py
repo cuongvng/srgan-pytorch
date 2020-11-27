@@ -4,6 +4,7 @@ sys.path.append("../")
 import torch
 import math
 from src.discriminator import Discriminator, ConvBlock
+from CONFIG import HR_CROPPED_SIZE
 
 class TestDiscriminator(unittest.TestCase):
 	def test_conv_blk(self):
@@ -18,9 +19,9 @@ class TestDiscriminator(unittest.TestCase):
 		self.assertEqual(out2.shape, (N, C_out, math.ceil(H/2), math.ceil(W/2)))
 
 	def test_discriminator(self):
-		N, C_in, H, W = 2, 3, 223, 169
+		N, C_in, H, W = 2, 3, HR_CROPPED_SIZE, HR_CROPPED_SIZE
 		X = torch.randn(size=(N, C_in, H, W), requires_grad=False)
-		d = Discriminator(H, W)
+		d = Discriminator()
 		with torch.no_grad():
 			out = d(X)
 		self.assertEqual(out.shape, (N, 1))
