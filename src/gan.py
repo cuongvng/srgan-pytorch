@@ -1,28 +1,38 @@
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 class Generator(nn.Module):
-	def __init__(self, n_blocks, upscale = 4):
+	def __init__(self, n_res_blks, upscale_factor=4):
 		super(Generator, self).__init__()
 
 		self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=9, padding=4)
-		self.prelu1 =  nn.PReLU()
+		self.prelu1 = nn.PReLU()
 
 		self.res_blocks = nn.Sequential()
-		for i in range(n_blocks):
-			self.res_blocks.add_module(f"res_blk{i}",
+		for i in range(n_res_blks):
+			self.res_blocks.add_module(f"res_blk_{i}",
 									   Residual_Block(in_channels=64, out_channels=64,strides=1, use_1x1_conv=False))
 		self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding=1)
 		self.bn = nn.BatchNorm2d(64)
 
 		self.pixel_shufflers = nn.Sequential()
 		for i in range(2):
-			pass
-
+			self.pixel_shufflers.add_module(f"pixel_shuffle_blk_{i}",
+											PixelShufflerBlock(in_channels=64, upscale_factor=upscale_factor//2))
+		self.conv3 = nn.Conv2d(in_channels=64, out_channels=3, kernel_size=9, padding=4)
 
 	def forward(self, X):
-		pass
+		X = self.prelu1(self.conv1(X))
+		X_before_resblks = X.clone()
+
+		X = self.res_blocks(X)
+		X = self.bn(self.conv2(X))
+		X = F.relu(X + X_before_resblks)
+
+		X = self.pixel_shufflers(X)
+		X = self.conv3(X)
+
+		return X
 
 class Residual_Block(nn.Module):
 	def __init__(self, in_channels, out_channels, strides, use_1x1_conv=True):
