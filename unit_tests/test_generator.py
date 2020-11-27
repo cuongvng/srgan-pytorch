@@ -20,6 +20,14 @@ class TestGenerator(unittest.TestCase):
 		out = ps(X)
 		self.assertEqual(out.shape, (N, C/upscale_factor**2, H*upscale_factor, W*upscale_factor))
 
+	def test_generator(self):
+		N, C, H, W = 5, 3, 100, 100
+		n_resblks, upscale_factor = 3, 4
+		X = torch.rand(size=(N, C, H, W))
+		g = Generator(n_resblks, upscale_factor)
+		out = g(X)
+		self.assertEqual(out.shape, (N, C, H*upscale_factor, W*upscale_factor))
+
 if __name__ == '__main__':
 	unittest.main()
 
