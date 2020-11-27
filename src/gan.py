@@ -48,9 +48,15 @@ class Residual_Block(nn.Module):
 
 		return F.relu(X + X_original)
 
-class PixelShuffler(nn.Module):
-	def __init__(self):
-		super(PixelShuffler, self).__init__()
+class PixelShufflerBlock(nn.Module):
+	def __init__(self, in_channels, upscale_factor=2):
+		super(PixelShufflerBlock, self).__init__()
+
+		self.blk = nn.Sequential(
+			nn.Conv2d(in_channels=in_channels, out_channels=256, kernel_size=3, padding=1),
+			nn.PixelShuffle(upscale_factor=upscale_factor),
+			nn.PReLU()
+		)
 
 	def forward(self, X):
-		pass
+		return self.blk(X)
