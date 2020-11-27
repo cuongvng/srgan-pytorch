@@ -17,7 +17,7 @@ class TestDiscriminator(unittest.TestCase):
 		self.assertEqual(out1.shape, (N, C_in, H, W))
 		self.assertEqual(out2.shape, (N, C_out, math.ceil(H/2), math.ceil(W/2)))
 
-	def test_D(self):
+	def test_discriminator(self):
 		N, C_in, H, W = 2, 3, 223, 169
 		X = torch.randn(size=(N, C_in, H, W), requires_grad=False)
 		d = Discriminator(H, W)
