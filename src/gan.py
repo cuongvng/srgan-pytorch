@@ -3,8 +3,23 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class Generator(nn.Module):
-	def __init__(self):
-		pass
+	def __init__(self, n_blocks, upscale = 4):
+		super(Generator, self).__init__()
+
+		self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=9, padding=4)
+		self.prelu1 =  nn.PReLU()
+
+		self.res_blocks = nn.Sequential()
+		for i in range(n_blocks):
+			self.res_blocks.add_module(f"res_blk{i}",
+									   Residual_Block(in_channels=64, out_channels=64,strides=1, use_1x1_conv=False))
+		self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding=1)
+		self.bn = nn.BatchNorm2d(64)
+
+		self.pixel_shufflers = nn.Sequential()
+		for i in range(2):
+			pass
+
 
 	def forward(self, X):
 		pass
@@ -33,10 +48,9 @@ class Residual_Block(nn.Module):
 
 		return F.relu(X + X_original)
 
-def test():
-	X = torch.ones(size=(2, 3, 100, 100))
-	res = Residual_Block(in_channels=3, out_channels=16, strides=1)
-	print(res(X).shape)
+class PixelShuffler(nn.Module):
+	def __init__(self):
+		super(PixelShuffler, self).__init__()
 
-if __name__ == "__main__":
-	test()
+	def forward(self, X):
+		pass
