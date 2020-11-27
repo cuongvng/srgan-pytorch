@@ -2,7 +2,7 @@ import unittest
 import sys
 import torch
 sys.path.append("../")
-from src.gan import Residual_Block, PixelShufflerBlock, Generator
+from src.generator import Residual_Block, PixelShufflerBlock, Generator
 
 class TestGenerator(unittest.TestCase):
 	def test_res_blk(self):
