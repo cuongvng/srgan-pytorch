@@ -4,7 +4,7 @@ sys.path.append("../")
 import torch
 import math
 from src.discriminator import Discriminator, ConvBlock
-from CONFIG import HR_CROPPED_SIZE
+from src.CONFIG import HR_CROPPED_SIZE
 
 class TestDiscriminator(unittest.TestCase):
 	def test_conv_blk(self):

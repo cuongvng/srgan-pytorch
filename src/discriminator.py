@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import sys
 sys.path.append("../")
-from CONFIG import HR_CROPPED_SIZE
+from src.CONFIG import HR_CROPPED_SIZE
 
 class Discriminator(nn.Module):
 	def __init__(self):

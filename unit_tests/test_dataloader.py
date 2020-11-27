@@ -3,7 +3,7 @@ import sys
 sys.path.append("../")
 import torchvision.transforms as trf
 from src.dataset import DIV2K
-from CONFIG import LR_CROPPED_SIZE, HR_CROPPED_SIZE
+from src.CONFIG import LR_CROPPED_SIZE, HR_CROPPED_SIZE
 
 class TestDataLoader(unittest.TestCase):
 	def test_train_lr(self):
