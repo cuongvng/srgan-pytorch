@@ -10,6 +10,11 @@ from CONFIG import LR_CROPPED_SIZE, HR_CROPPED_SIZE
 from generator import Generator
 from discriminator import Discriminator
 
+def train():
+	pass
+
+def _load_data(data_dir):
+	data_train_HR = DIV2K()
 
 def xavier_init_weights(model):
 	if isinstance(model, torch.nn.Linear) or isinstance(model, torch.nn.Conv2d):
