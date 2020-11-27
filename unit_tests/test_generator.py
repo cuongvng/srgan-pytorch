@@ -3,6 +3,7 @@ import sys
 import torch
 sys.path.append("../")
 from src.generator import Residual_Block, PixelShufflerBlock, Generator
+import random
 
 class TestGenerator(unittest.TestCase):
 	def test_res_blk(self):
@@ -21,12 +22,15 @@ class TestGenerator(unittest.TestCase):
 		self.assertEqual(out.shape, (N, C/upscale_factor**2, H*upscale_factor, W*upscale_factor))
 
 	def test_generator(self):
-		N, C, H, W = 5, 3, 100, 100
+		N, C = 5, 3
 		n_resblks, upscale_factor = 3, 4
-		X = torch.rand(size=(N, C, H, W))
-		g = Generator(n_resblks, upscale_factor)
-		out = g(X)
-		self.assertEqual(out.shape, (N, C, H*upscale_factor, W*upscale_factor))
+		for _ in range(5):
+			H, W = random.randint(100, 200), random.randint(100, 200)
+			X = torch.rand(size=(N, C, H, W))
+			g = Generator(n_resblks, upscale_factor)
+			with torch.no_grad():
+				out = g(X)
+				self.assertEqual(out.shape, (N, C, H*upscale_factor, W*upscale_factor))
 
 if __name__ == '__main__':
 	unittest.main()
