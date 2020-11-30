@@ -30,7 +30,19 @@ def train(resume_training=True):
 	D = Discriminator()
 	optimizerG = optim.Adam(G.parameters())
 	optimizerD = optim.Adam(D.parameters())
-	G, D, optimizerG, optimizerD, prev_epochs = load_checkpoints(resume_training, G, D, optimizerG, optimizerD)
+
+	if resume_training and PATH_G.exists() and PATH_D.exists():
+		G, D, optimizerG, optimizerD, prev_epochs = load_checkpoints(G, D, optimizerG, optimizerD)
+		print("Training from previous checkpoints ...")
+	else:
+		G.apply(xavier_init_weights).to(device)
+		D.apply(xavier_init_weights).to(device)
+		prev_epochs = 0
+		summary(G, input_size=(3, LR_CROPPED_SIZE, LR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
+		summary(D, input_size=(3, HR_CROPPED_SIZE, HR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
+		print("Training from initial values ...")
+
+
 
 	### Train
 	G.train()
@@ -119,26 +131,16 @@ def save_checkpoints(G, D, optimizer_G, optimizer_D, epoch):
 	torch.save(checkpoint_G, PATH_G)
 	torch.save(checkpoint_D, PATH_D)
 
-def load_checkpoints(resume_training, G, D, optimizerG, optimizerD):
-	if resume_training and PATH_G.exists() and PATH_D.exists():
-		checkpoint_G = torch.load(PATH_G)
-		checkpoint_D = torch.load(PATH_D)
-		G.load_state_dict(checkpoint_G['state_dict']).to(device)
-		optimizerG.load_state_dict(checkpoint_G['optimizer'])
-		D.load_state_dict(checkpoint_D['state_dict']).to(device)
-		optimizerD.load_state_dict(checkpoint_D['optimizer'])
-		prev_epochs = checkpoint_G['epoch']
-		summary(G, input_size=(3, LR_CROPPED_SIZE, LR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
-		summary(D, input_size=(3, HR_CROPPED_SIZE, HR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
-		print("Training from previous checkpoints ...")
-	else:
-		G.apply(xavier_init_weights).to(device)
-		D.apply(xavier_init_weights).to(device)
-		prev_epochs = 0
-		summary(G, input_size=(3, LR_CROPPED_SIZE, LR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
-		summary(D, input_size=(3, HR_CROPPED_SIZE, HR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
-		print("Training from initial values ...")
+def load_checkpoints(G, D, optimizerG, optimizerD):
+	checkpoint_G = torch.load(PATH_G)
+	checkpoint_D = torch.load(PATH_D)
+	G.load_state_dict(checkpoint_G['state_dict']).to(device)
+	optimizerG.load_state_dict(checkpoint_G['optimizer'])
+	D.load_state_dict(checkpoint_D['state_dict']).to(device)
+	optimizerD.load_state_dict(checkpoint_D['optimizer'])
+	prev_epochs = checkpoint_G['epoch']
 
+	print("Loaded checkpoints successfully!")
 	return G, D, optimizerG, optimizerD, prev_epochs
 
 def xavier_init_weights(model):
