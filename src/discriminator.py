@@ -29,7 +29,7 @@ class Discriminator(nn.Module):
 		X = self.conv_blks(X)
 		X = X.flatten(start_dim=1)
 		X = F.leaky_relu(self.fc1(X), negative_slope=0.2)
-		return self.fc2(X)
+		return F.sigmoid(self.fc2(X))
 
 class ConvBlock(nn.Module):
 	def __init__(self, in_channels, out_channels, strides=1):
