@@ -47,8 +47,6 @@ def train(resume_training=True):
 	D.train()
 
 	criterion = torch.nn.BCELoss()
-	real_value = 1.0
-	fake_value = 0.0
 
 	for e in range(EPOCHS):
 		print(f"\nEpoch: {e+prev_epochs+1}")
@@ -63,13 +61,13 @@ def train(resume_training=True):
 			optimizerD.zero_grad()
 
 			# Classify all-real HR images
-			real_labels = torch.full(size=(len(hr_img),), fill_value=real_value, dtype=torch.float, device=device)
+			real_labels = torch.full(size=(len(hr_img),), fill_value=REAL_VALUE, dtype=torch.float, device=device)
 			output_real = D(hr_img).view(-1)
 			err_D_real = criterion(output_real, real_labels)
 			err_D_real.backward()
 
 			# Classify all-fake HR images (or SR images)
-			fake_labels = torch.full(size=(len(hr_img),), fill_value=fake_value, dtype=torch.float, device=device)
+			fake_labels = torch.full(size=(len(hr_img),), fill_value=FAKE_VALUE, dtype=torch.float, device=device)
 			sr_img = G(lr_img)
 			output_fake = D(sr_img.detach()).view(-1)
 			err_D_fake = criterion(output_fake, fake_labels)
