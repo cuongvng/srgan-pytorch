@@ -23,7 +23,7 @@ def train(resume_training=True):
 	If checkpoints cannot be found, train from beginning, regardless of `resume_training`.
 	'''
 	### Load data
-	hr_train_loader, lr_train_loader, hr_val_loader, lr_val_loader = load_data()
+	hr_train_loader, lr_train_loader = load_training_data()
 
 	### Load models
 	G = Generator(n_res_blks=N_RESBLK_G, upscale_factor=UPSCALE)
@@ -93,20 +93,16 @@ def train(resume_training=True):
 		### Save checkpoints
 		save_checkpoints(G, D, optimizerG, optimizerD, epoch=prev_epochs+e+1)
 
-def load_data():
+def load_training_data():
 	data_train_hr = DIV2K(data_dir=TRAIN_HR_DIR, transform=CenterCrop(size=HR_CROPPED_SIZE))
 	data_train_lr = DIV2K(data_dir=TRAIN_LR_DIR, transform=CenterCrop(size=LR_CROPPED_SIZE))
-	data_val_hr = DIV2K(data_dir=VAL_HR_DIR, transform=CenterCrop(size=HR_CROPPED_SIZE))
-	data_val_lr = DIV2K(data_dir=VAL_LR_DIR, transform=CenterCrop(size=LR_CROPPED_SIZE))
 
 	hr_train_loader = DataLoader(dataset=data_train_hr, shuffle=True, batch_size=BATCH_SIZE, drop_last=False)
 	lr_train_loader = DataLoader(dataset=data_train_lr, shuffle=True, batch_size=BATCH_SIZE, drop_last=False)
-	hr_val_loader = DataLoader(dataset=data_val_hr, shuffle=True, batch_size=BATCH_SIZE, drop_last=False)
-	lr_val_loader = DataLoader(dataset=data_val_lr, shuffle=True, batch_size=BATCH_SIZE, drop_last=False)
 
-	assert len(hr_train_loader) == len(lr_train_loader) and len(hr_val_loader) == len(lr_val_loader)
+	assert len(hr_train_loader) == len(lr_train_loader)
 
-	return hr_train_loader, lr_train_loader, hr_val_loader, lr_val_loader
+	return hr_train_loader, lr_train_loader
 
 def save_checkpoints(G, D, optimizer_G, optimizer_D, epoch):
 	checkpoint_G = {
