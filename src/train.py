@@ -24,7 +24,11 @@ def train(resume_training=True):
 	If checkpoints cannot be found, train from beginning, regardless of `resume_training`.
 	'''
 	### Load data
-	hr_train_loader, lr_train_loader = load_training_data()
+	data_train_hr, data_train_lr = load_training_data()
+	hr_train_loader = DataLoader(dataset=data_train_hr, shuffle=True, batch_size=BATCH_SIZE, drop_last=False)
+	lr_train_loader = DataLoader(dataset=data_train_lr, shuffle=True, batch_size=BATCH_SIZE, drop_last=False)
+	assert len(hr_train_loader) == len(lr_train_loader)
+
 
 	### Load models
 	G = Generator(n_res_blks=N_RESBLK_G, upscale_factor=UPSCALE)
@@ -53,7 +57,7 @@ def train(resume_training=True):
 		print(f"\nEpoch: {e+prev_epochs+1}")
 
 		for (batch, hr_batch), lr_batch in zip(enumerate(hr_train_loader), lr_train_loader):
-			print(f"\tBatch: {batch}/{len(hr_train_loader)//BATCH_SIZE}")
+			print(f"\tBatch: {batch+1}/{len(data_train_hr)//BATCH_SIZE}")
 
 			# Transfer data to GPU if available
 			hr_img, lr_img = hr_batch[0].to(device), lr_batch[0].to(device)
@@ -105,13 +109,7 @@ def train(resume_training=True):
 def load_training_data():
 	data_train_hr = DIV2K(data_dir=os.path.join("../", TRAIN_HR_DIR), transform=CenterCrop(size=HR_CROPPED_SIZE))
 	data_train_lr = DIV2K(data_dir=os.path.join("../", TRAIN_LR_DIR), transform=CenterCrop(size=LR_CROPPED_SIZE))
-
-	hr_train_loader = DataLoader(dataset=data_train_hr, shuffle=True, batch_size=BATCH_SIZE, drop_last=False)
-	lr_train_loader = DataLoader(dataset=data_train_lr, shuffle=True, batch_size=BATCH_SIZE, drop_last=False)
-
-	assert len(hr_train_loader) == len(lr_train_loader)
-
-	return hr_train_loader, lr_train_loader
+	return data_train_hr, data_train_lr
 
 def save_checkpoints(G, D, optimizer_G, optimizer_D, epoch):
 	checkpoint_G = {
