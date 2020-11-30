@@ -33,16 +33,14 @@ def train(resume_training=True):
 
 	if resume_training and PATH_G.exists() and PATH_D.exists():
 		G, D, optimizerG, optimizerD, prev_epochs = load_checkpoints(G, D, optimizerG, optimizerD)
-		print("Training from previous checkpoints ...")
+		print("Continue training from previous checkpoints ...")
 	else:
 		G.apply(xavier_init_weights).to(device)
 		D.apply(xavier_init_weights).to(device)
 		prev_epochs = 0
 		summary(G, input_size=(3, LR_CROPPED_SIZE, LR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
 		summary(D, input_size=(3, HR_CROPPED_SIZE, HR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
-		print("Training from initial values ...")
-
-
+		print("Training from start ...")
 
 	### Train
 	G.train()
@@ -59,20 +57,20 @@ def train(resume_training=True):
 			print(f"\tBatch: {batch}/{len(hr_train_loader)//BATCH_SIZE}")
 
 			# Transfer data to GPU if available
-			hr_batch, lr_batch = hr_batch.to(device), lr_batch.to(device)
+			hr_img, lr_img = hr_batch[0].to(device), lr_batch[0].to(device)
 
 			#### TRAIN D: maximize `log(D(x)) + log(1-D(G(z)))`
 			optimizerD.zero_grad()
 
 			# Classify all-real HR images
-			real_labels = torch.full(size=(len(hr_batch),), fill_value=real_value, dtype=torch.float, device=device)
-			output_real = D(hr_batch).view(-1)
+			real_labels = torch.full(size=(len(hr_img),), fill_value=real_value, dtype=torch.float, device=device)
+			output_real = D(hr_img).view(-1)
 			err_D_real = criterion(output_real, real_labels)
 			err_D_real.backward()
 
 			# Classify all-fake HR images (or SR images)
-			fake_labels = torch.full(size=(len(hr_batch),), fill_value=fake_value, dtype=torch.float, device=device)
-			sr_img = G(lr_batch)
+			fake_labels = torch.full(size=(len(hr_img),), fill_value=fake_value, dtype=torch.float, device=device)
+			sr_img = G(lr_img)
 			output_fake = D(sr_img.detach()).view(-1)
 			err_D_fake = criterion(output_fake, fake_labels)
 			err_D_fake.backward()
@@ -95,11 +93,11 @@ def train(resume_training=True):
 
 			# Print stats
 			D_Gz2 = output_fake.mean().item()
-			print(f"   err_D: {err_D.item():.4f}; err_G: {err_G.item():.4f}; D_x: {D_x:.4f}; "
+			print(f"\terr_D: {err_D.item():.4f}; err_G: {err_G.item():.4f}; D_x: {D_x:.4f}; "
 				  f"D_Gz1: {D_Gz1:.4f}; D_Gz2: {D_Gz2:.4f}")
 
 			## Free up GPU memory
-			del hr_batch, lr_batch, err_D, err_G, real_labels, fake_labels, output_real, output_fake, sr_img
+			del hr_img, lr_img, err_D, err_G, real_labels, fake_labels, output_real, output_fake, sr_img
 			torch.cuda.empty_cache()
 
 		### Save checkpoints

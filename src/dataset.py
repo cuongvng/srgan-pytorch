@@ -23,4 +23,5 @@ class DIV2K(Dataset):
 
 		img_data = np.array(img.getdata()).reshape((3, img.size[0], img.size[1]))
 		img_tensor = torch.tensor(img_data, dtype=torch.float32)
-		return img_tensor
+		file_name = self.file_paths[index].split('/')[-1]
+		return img_tensor, file_name
