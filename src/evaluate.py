@@ -5,7 +5,10 @@ from dataset import DIV2K
 from generator import Generator
 from discriminator import Discriminator
 from train import PATH_G, PATH_D
-from src.CONFIG import *
+import os
+import sys
+sys.path.append('../')
+from CONFIG import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"device: {str(device).upper()}")
@@ -63,8 +66,8 @@ def run_eval():
 		print(f"\terr_D: {sum(errors_D)/len(errors_D):.4f}; err_G: {sum(errors_G)/len(errors_G):.4f}")
 
 def load_test_data():
-	data_test_hr = DIV2K(data_dir=VAL_HR_DIR, transform=CenterCrop(size=HR_CROPPED_SIZE))
-	data_test_lr = DIV2K(data_dir=VAL_LR_DIR, transform=CenterCrop(size=LR_CROPPED_SIZE))
+	data_test_hr = DIV2K(data_dir=os.path.join("../", VAL_HR_DIR), transform=CenterCrop(size=HR_CROPPED_SIZE))
+	data_test_lr = DIV2K(data_dir=os.path.join("../", VAL_LR_DIR), transform=CenterCrop(size=LR_CROPPED_SIZE))
 	hr_test_loader = DataLoader(dataset=data_test_hr, shuffle=False, batch_size=BATCH_SIZE, drop_last=False)
 	lr_test_loader = DataLoader(dataset=data_test_lr, shuffle=False, batch_size=BATCH_SIZE, drop_last=False)
 

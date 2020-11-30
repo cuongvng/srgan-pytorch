@@ -6,10 +6,11 @@ from torchsummary import summary
 from pathlib import Path
 import sys
 sys.path.append("../")
+import os
 from dataset import DIV2K
 from generator import Generator
 from discriminator import Discriminator
-from src.CONFIG import *
+from CONFIG import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"device: {str(device).upper()}")
@@ -102,8 +103,8 @@ def train(resume_training=True):
 		save_checkpoints(G, D, optimizerG, optimizerD, epoch=prev_epochs+e+1)
 
 def load_training_data():
-	data_train_hr = DIV2K(data_dir=TRAIN_HR_DIR, transform=CenterCrop(size=HR_CROPPED_SIZE))
-	data_train_lr = DIV2K(data_dir=TRAIN_LR_DIR, transform=CenterCrop(size=LR_CROPPED_SIZE))
+	data_train_hr = DIV2K(data_dir=os.path.join("../", TRAIN_HR_DIR), transform=CenterCrop(size=HR_CROPPED_SIZE))
+	data_train_lr = DIV2K(data_dir=os.path.join("../", TRAIN_LR_DIR), transform=CenterCrop(size=LR_CROPPED_SIZE))
 
 	hr_train_loader = DataLoader(dataset=data_train_hr, shuffle=True, batch_size=BATCH_SIZE, drop_last=False)
 	lr_train_loader = DataLoader(dataset=data_train_lr, shuffle=True, batch_size=BATCH_SIZE, drop_last=False)
