@@ -41,7 +41,7 @@ def train(resume_training=True):
 	fake_value = 0.0
 
 	for e in range(EPOCHS):
-		print(f"\nEpoch: {e}")
+		print(f"\nEpoch: {e+prev_epochs+1}")
 
 		for (batch, hr_batch), lr_batch in zip(enumerate(hr_train_loader), lr_train_loader):
 			print(f"\tBatch: {batch}/{len(hr_train_loader)//BATCH_SIZE}")
