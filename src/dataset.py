@@ -9,7 +9,7 @@ class DIV2K(Dataset):
 	def __init__(self, data_dir, transform=None):
 		# Get all paths of images inside `data_dir` into a list
 		pattern = os.path.join(data_dir, "**/*.png")
-		self.file_paths = glob.glob(pattern, recursive=True)
+		self.file_paths = sorted(glob.glob(pattern, recursive=True))
 		self.transform = transform
 
 	def __len__(self):

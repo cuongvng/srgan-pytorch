@@ -26,6 +26,13 @@ class TestDataLoader(unittest.TestCase):
 		for i in range(len(data)):
 			self.assertEqual(data[i][0].shape, (3, HR_CROPPED_SIZE, HR_CROPPED_SIZE))
 
+	def test_matching_pairs(self):
+		hr = DIV2K(data_dir="../DIV2K/DIV2K_train_HR", transform=trf.CenterCrop(size=HR_CROPPED_SIZE))
+		lr = DIV2K(data_dir="../DIV2K/DIV2K_train_LR_bicubic", transform=trf.CenterCrop(size=LR_CROPPED_SIZE))
+		for i in range(len(hr)):
+			hr_name = hr[i][1]
+			lr_name = lr[i][1]
+			self.assertEqual(hr_name[0:4], lr_name[0:4])
 
 if __name__ == '__main__':
 	unittest.main()
