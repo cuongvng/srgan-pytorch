@@ -15,6 +15,11 @@ from loss import PerceptualLoss
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"device: {str(device).upper()}")
 
+try:
+	os.mkdir("../model")
+except FileExistsError:
+	pass
+
 PATH_G = Path('../model/G.pt')
 PATH_D = Path('../model/D.pt')
 
@@ -25,8 +30,8 @@ def train(resume_training=True):
 	'''
 	### Load data
 	data_train_hr, data_train_lr = load_training_data()
-	hr_train_loader = DataLoader(dataset=data_train_hr, shuffle=True, batch_size=BATCH_SIZE, drop_last=False)
-	lr_train_loader = DataLoader(dataset=data_train_lr, shuffle=True, batch_size=BATCH_SIZE, drop_last=False)
+	hr_train_loader = DataLoader(dataset=data_train_hr, shuffle=False, batch_size=BATCH_SIZE, drop_last=False)
+	lr_train_loader = DataLoader(dataset=data_train_lr, shuffle=False, batch_size=BATCH_SIZE, drop_last=False)
 	assert len(hr_train_loader) == len(lr_train_loader)
 
 
@@ -51,7 +56,7 @@ def train(resume_training=True):
 	G.train()
 	D.train()
 
-	criterion_G = PerceptualLoss(vgg_coef=VGG_LOSS_COEF, adversarial_coef=ADVERSARIAL_LOSS_COEF)
+	criterion_G = PerceptualLoss(vgg_coef=VGG_LOSS_COEF, adversarial_coef=ADVERSARIAL_LOSS_COEF).to(device)
 	criterion_D = torch.nn.BCELoss()
 
 	for e in range(EPOCHS):
