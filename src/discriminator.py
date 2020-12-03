@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import math
 import sys
 sys.path.append("../")
 from CONFIG import HR_CROPPED_SIZE
@@ -21,7 +22,8 @@ class Discriminator(nn.Module):
 			ConvBlock(256, 512, 1),
 			ConvBlock(512, 512, 2)
 		)
-		self.fc1 = nn.Linear(in_features=512*(HR_CROPPED_SIZE//16)**2, out_features=1024)
+		h = w = math.ceil(HR_CROPPED_SIZE/16)
+		self.fc1 = nn.Linear(in_features=512*h*w, out_features=1024)
 		self.fc2 = nn.Linear(in_features=1024, out_features=1)
 
 	def forward(self, X):
