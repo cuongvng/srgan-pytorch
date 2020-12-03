@@ -34,10 +34,9 @@ def train(resume_training=True):
 	lr_train_loader = DataLoader(dataset=data_train_lr, shuffle=False, batch_size=BATCH_SIZE, drop_last=False)
 	assert len(hr_train_loader) == len(lr_train_loader)
 
-
 	### Load models
-	G = Generator(n_res_blks=N_RESBLK_G, upscale_factor=UPSCALE)
-	D = Discriminator()
+	G = Generator(n_res_blks=N_RESBLK_G, upscale_factor=UPSCALE).to(device)
+	D = Discriminator().to(device)
 	optimizer_G = optim.Adam(G.parameters())
 	optimizer_D = optim.Adam(D.parameters())
 
@@ -51,9 +50,6 @@ def train(resume_training=True):
 		summary(G, input_size=(3, LR_CROPPED_SIZE, LR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
 		summary(D, input_size=(3, HR_CROPPED_SIZE, HR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
 		print("Training from start ...")
-
-	G.to(device)
-	D.to(device)
 
 	### Train
 	G.train()
@@ -136,6 +132,7 @@ def save_checkpoints(G, D, optimizer_G, optimizer_D, epoch):
 	torch.save(checkpoint_D, PATH_D)
 
 def load_checkpoints(G, D, optimizerG, optimizerD):
+	print("Loading checkpoints ...")
 	checkpoint_G = torch.load(PATH_G)
 	checkpoint_D = torch.load(PATH_D)
 	G.load_state_dict(checkpoint_G['state_dict'])
