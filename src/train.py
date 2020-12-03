@@ -11,7 +11,7 @@ from dataset import DIV2K
 from generator import Generator
 from discriminator import Discriminator
 from CONFIG import *
-
+from loss import PerceptualLoss
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"device: {str(device).upper()}")
 
@@ -33,11 +33,11 @@ def train(resume_training=True):
 	### Load models
 	G = Generator(n_res_blks=N_RESBLK_G, upscale_factor=UPSCALE)
 	D = Discriminator()
-	optimizerG = optim.Adam(G.parameters())
-	optimizerD = optim.Adam(D.parameters())
+	optimizer_G = optim.Adam(G.parameters())
+	optimizer_D = optim.Adam(D.parameters())
 
 	if resume_training and PATH_G.exists() and PATH_D.exists():
-		G, D, optimizerG, optimizerD, prev_epochs = load_checkpoints(G, D, optimizerG, optimizerD)
+		G, D, optimizer_G, optimizer_D, prev_epochs = load_checkpoints(G, D, optimizer_G, optimizer_D)
 		print("Continue training from previous checkpoints ...")
 	else:
 		G.apply(xavier_init_weights).to(device)
@@ -51,7 +51,8 @@ def train(resume_training=True):
 	G.train()
 	D.train()
 
-	criterion = torch.nn.BCELoss()
+	criterion_G = PerceptualLoss(vgg_coef=VGG_LOSS_COEF, adversarial_coef=ADVERSARIAL_LOSS_COEF)
+	criterion_D = torch.nn.BCELoss()
 
 	for e in range(EPOCHS):
 		print(f"\nEpoch: {e+prev_epochs+1}")
@@ -63,22 +64,22 @@ def train(resume_training=True):
 			hr_img, lr_img = hr_batch[0].to(device), lr_batch[0].to(device)
 
 			#### TRAIN D: maximize `log(D(x)) + log(1-D(G(z)))`
-			optimizerD.zero_grad()
+			optimizer_D.zero_grad()
 
 			# Classify all-real HR images
 			real_labels = torch.full(size=(len(hr_img),), fill_value=REAL_VALUE, dtype=torch.float, device=device)
 			output_real = D(hr_img).view(-1)
-			err_D_real = criterion(output_real, real_labels)
+			err_D_real = criterion_D(output_real, real_labels)
 			err_D_real.backward()
 
 			# Classify all-fake HR images (or SR images)
 			fake_labels = torch.full(size=(len(hr_img),), fill_value=FAKE_VALUE, dtype=torch.float, device=device)
 			sr_img = G(lr_img)
 			output_fake = D(sr_img.detach()).view(-1)
-			err_D_fake = criterion(output_fake, fake_labels)
+			err_D_fake = criterion_D(output_fake, fake_labels)
 			err_D_fake.backward()
 
-			optimizerD.step()
+			optimizer_D.step()
 
 			# For logging
 			D_x = output_real.mean().item()
@@ -86,13 +87,13 @@ def train(resume_training=True):
 			err_D = err_D_real + err_D_fake
 
 			#### TRAIN G: minimize `log(D(G(z))`
-			optimizerG.zero_grad()
+			optimizer_G.zero_grad()
 
 			output_fake = D(sr_img).view(-1)
-			err_G = criterion(output_fake, real_labels)
+			err_G = criterion_G(sr_img, hr_img, output_fake)
 			err_G.backward()
 
-			optimizerG.step()
+			optimizer_G.step()
 
 			# Print stats
 			D_Gz2 = output_fake.mean().item()
@@ -104,7 +105,7 @@ def train(resume_training=True):
 			torch.cuda.empty_cache()
 
 		### Save checkpoints
-		save_checkpoints(G, D, optimizerG, optimizerD, epoch=prev_epochs+e+1)
+		save_checkpoints(G, D, optimizer_G, optimizer_D, epoch=prev_epochs+e+1)
 
 def load_training_data():
 	data_train_hr = DIV2K(data_dir=os.path.join("../", TRAIN_HR_DIR), transform=CenterCrop(size=HR_CROPPED_SIZE))
