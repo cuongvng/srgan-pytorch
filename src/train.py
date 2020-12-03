@@ -45,12 +45,15 @@ def train(resume_training=True):
 		G, D, optimizer_G, optimizer_D, prev_epochs = load_checkpoints(G, D, optimizer_G, optimizer_D)
 		print("Continue training from previous checkpoints ...")
 	else:
-		G.apply(xavier_init_weights).to(device)
-		D.apply(xavier_init_weights).to(device)
+		G.apply(xavier_init_weights)
+		D.apply(xavier_init_weights)
 		prev_epochs = 0
 		summary(G, input_size=(3, LR_CROPPED_SIZE, LR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
 		summary(D, input_size=(3, HR_CROPPED_SIZE, HR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
 		print("Training from start ...")
+
+	G.to(device)
+	D.to(device)
 
 	### Train
 	G.train()
@@ -135,9 +138,9 @@ def save_checkpoints(G, D, optimizer_G, optimizer_D, epoch):
 def load_checkpoints(G, D, optimizerG, optimizerD):
 	checkpoint_G = torch.load(PATH_G)
 	checkpoint_D = torch.load(PATH_D)
-	G.load_state_dict(checkpoint_G['state_dict']).to(device)
+	G.load_state_dict(checkpoint_G['state_dict'])
 	optimizerG.load_state_dict(checkpoint_G['optimizer'])
-	D.load_state_dict(checkpoint_D['state_dict']).to(device)
+	D.load_state_dict(checkpoint_D['state_dict'])
 	optimizerD.load_state_dict(checkpoint_D['optimizer'])
 	prev_epochs = checkpoint_G['epoch']
 
