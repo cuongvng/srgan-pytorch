@@ -1,5 +1,5 @@
 import torch
-from torchvision.transforms import CenterCrop
+import torchvision.transforms as trf
 from torch.utils.data import DataLoader
 import torch.optim as optim
 from torchsummary import summary
@@ -112,8 +112,17 @@ def train(resume_training=True):
 		save_checkpoints(G, D, optimizer_G, optimizer_D, epoch=prev_epochs+e+1)
 
 def load_training_data():
-	data_train_hr = DIV2K(data_dir=os.path.join("../", TRAIN_HR_DIR), transform=CenterCrop(size=HR_CROPPED_SIZE))
-	data_train_lr = DIV2K(data_dir=os.path.join("../", TRAIN_LR_DIR), transform=CenterCrop(size=LR_CROPPED_SIZE))
+	transform_hr = trf.Compose([
+		trf.CenterCrop(HR_CROPPED_SIZE),
+		trf.ToTensor()
+		])
+	transform_lr = trf.Compose([
+		trf.CenterCrop(LR_CROPPED_SIZE),
+		trf.ToTensor()
+		])
+
+	data_train_hr = DIV2K(data_dir=os.path.join("../", TRAIN_HR_DIR), transform=transform_hr)
+	data_train_lr = DIV2K(data_dir=os.path.join("../", TRAIN_LR_DIR), transform=transform_lr)
 	return data_train_hr, data_train_lr
 
 def save_checkpoints(G, D, optimizer_G, optimizer_D, epoch):

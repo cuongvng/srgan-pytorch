@@ -1,5 +1,5 @@
 import torch
-from torchvision.transforms import CenterCrop
+import torchvision.transforms as trf
 from torch.utils.data import DataLoader
 from dataset import DIV2K
 from generator import Generator
@@ -66,8 +66,17 @@ def run_eval():
 		print(f"\terr_D: {sum(errors_D)/len(errors_D):.4f}; err_G: {sum(errors_G)/len(errors_G):.4f}")
 
 def load_test_data():
-	data_test_hr = DIV2K(data_dir=os.path.join("../", VAL_HR_DIR), transform=CenterCrop(size=HR_CROPPED_SIZE))
-	data_test_lr = DIV2K(data_dir=os.path.join("../", VAL_LR_DIR), transform=CenterCrop(size=LR_CROPPED_SIZE))
+	transform_hr = trf.Compose([
+		trf.CenterCrop(HR_CROPPED_SIZE),
+		trf.ToTensor()
+		])
+	transform_lr = trf.Compose([
+		trf.CenterCrop(LR_CROPPED_SIZE),
+		trf.ToTensor()
+		])
+
+	data_test_hr = DIV2K(data_dir=os.path.join("../", VAL_HR_DIR), transform=transform_hr)
+	data_test_lr = DIV2K(data_dir=os.path.join("../", VAL_LR_DIR), transform=transform_lr)
 	hr_test_loader = DataLoader(dataset=data_test_hr, shuffle=False, batch_size=BATCH_SIZE, drop_last=False)
 	lr_test_loader = DataLoader(dataset=data_test_lr, shuffle=False, batch_size=BATCH_SIZE, drop_last=False)
 
@@ -82,3 +91,6 @@ def load_checkpoints(G, D):
 
 	print("Loaded checkpoints successfully!")
 	return G, D
+
+def tensor_to_img(tensor):
+	pil = ToPILImage(tensor)
