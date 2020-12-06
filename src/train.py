@@ -23,6 +23,15 @@ except FileExistsError:
 PATH_G = Path('../model/G.pt')
 PATH_D = Path('../model/D.pt')
 
+transform_hr = trf.Compose([
+	trf.CenterCrop(HR_CROPPED_SIZE),
+	trf.ToTensor()
+])
+transform_lr = trf.Compose([
+	trf.CenterCrop(LR_CROPPED_SIZE),
+	trf.ToTensor()
+])
+
 def train(resume_training=True):
 	'''
 	:param `resume_training`: whether to continue training from previous checkpoint or not.
@@ -112,15 +121,6 @@ def train(resume_training=True):
 		save_checkpoints(G, D, optimizer_G, optimizer_D, epoch=prev_epochs+e+1)
 
 def load_training_data():
-	transform_hr = trf.Compose([
-		trf.CenterCrop(HR_CROPPED_SIZE),
-		trf.ToTensor()
-		])
-	transform_lr = trf.Compose([
-		trf.CenterCrop(LR_CROPPED_SIZE),
-		trf.ToTensor()
-		])
-
 	data_train_hr = DIV2K(data_dir=os.path.join("../", TRAIN_HR_DIR), transform=transform_hr)
 	data_train_lr = DIV2K(data_dir=os.path.join("../", TRAIN_LR_DIR), transform=transform_lr)
 	return data_train_hr, data_train_lr
