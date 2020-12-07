@@ -16,6 +16,7 @@ def generate_sr(lr_img_path):
 		pil_img = Image.open(lr_img_path)
 		img_tensor = trf.ToTensor()(pil_img)
 		img_tensor = torch.unsqueeze(img_tensor, 0) # add batch dimension
+		img_tensor = img_tensor.to(device)
 		sr_img = G(img_tensor)
 		print(f"Upscaled from size [{img_tensor.shape[2]}, {img_tensor.shape[3]}] to [{sr_img.shape[2]}, {sr_img.shape[3]}]")
 
@@ -24,6 +25,7 @@ def generate_sr(lr_img_path):
 	tensor_to_img(sr_img, sr_img_path)
 
 def tensor_to_img(tensor, filepath):
+	tensor = tensor.cpu()
 	pil = trf.ToPILImage()(tensor.squeeze_(0))
 	pil.save(filepath)
 	print(f"Saved to {filepath}")
@@ -38,7 +40,8 @@ if __name__ == '__main__':
 	G = Generator(n_res_blks=N_RESBLK_G, upscale_factor=UPSCALE)
 	if PATH_G.exists():
 		checkpoint_G = torch.load(PATH_G)
-		G.load_state_dict(checkpoint_G['state_dict']).to(device)
+		G.load_state_dict(checkpoint_G['state_dict'])
+		G.to(device)
 	else:
 		print("Checkpoints not found, using Xavier initialization.")
 		G.apply(xavier_init_weights).to(device)
