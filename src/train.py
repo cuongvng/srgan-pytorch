@@ -46,8 +46,8 @@ def train(resume_training=True):
 	### Load models
 	G = Generator(n_res_blks=N_RESBLK_G, upscale_factor=UPSCALE).to(device)
 	D = Discriminator().to(device)
-	optimizer_G = optim.Adam(G.parameters())
-	optimizer_D = optim.Adam(D.parameters())
+	optimizer_G = optim.Adam(G.parameters(), lr=LR)
+	optimizer_D = optim.Adam(D.parameters(), lr=LR)
 
 	if resume_training and PATH_G.exists() and PATH_D.exists():
 		G, D, optimizer_G, optimizer_D, prev_epochs = load_checkpoints(G, D, optimizer_G, optimizer_D)
@@ -83,21 +83,20 @@ def train(resume_training=True):
 			real_labels = torch.full(size=(len(hr_img),), fill_value=REAL_VALUE, dtype=torch.float, device=device)
 			output_real = D(hr_img).view(-1)
 			err_D_real = criterion_D(output_real, real_labels)
-			err_D_real.backward()
 
 			# Classify all-fake HR images (or SR images)
 			fake_labels = torch.full(size=(len(hr_img),), fill_value=FAKE_VALUE, dtype=torch.float, device=device)
 			sr_img = G(lr_img)
 			output_fake = D(sr_img.detach()).view(-1)
 			err_D_fake = criterion_D(output_fake, fake_labels)
-			err_D_fake.backward()
 
+			err_D = err_D_real + err_D_fake
+			err_D.backward()
 			optimizer_D.step()
 
 			# For logging
 			D_x = output_real.mean().item()
 			D_Gz1 = output_fake.mean().item()
-			err_D = err_D_real + err_D_fake
 
 			#### TRAIN G: minimize `log(D(G(z))`
 			optimizer_G.zero_grad()
