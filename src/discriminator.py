@@ -1,9 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
-import math
 import sys
 sys.path.append("../")
-from CONFIG import HR_CROPPED_SIZE
 
 class Discriminator(nn.Module):
 	def __init__(self):
@@ -22,16 +20,21 @@ class Discriminator(nn.Module):
 			ConvBlock(256, 512, 1),
 			ConvBlock(512, 512, 2)
 		)
-		h = w = math.ceil(HR_CROPPED_SIZE/16)
-		self.fc1 = nn.Linear(in_features=512*h*w, out_features=1024)
-		self.fc2 = nn.Linear(in_features=1024, out_features=1)
+		self.global_pooling = nn.AdaptiveAvgPool2d(output_size=1)
+		self.conv2 = nn.Sequential(
+			nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=1),
+			nn.LeakyReLU(negative_slope=0.2)
+		)
+		self.conv3 = nn.Conv2d(in_channels=1024, out_channels=1, kernel_size=1)
 
 	def forward(self, X):
 		X = self.conv1(X)
 		X = self.conv_blks(X)
+		X = self.global_pooling(X)
+		X = self.conv2(X)
+		X = self.conv3(X)
 		X = X.flatten(start_dim=1)
-		X = F.leaky_relu(self.fc1(X), negative_slope=0.2)
-		return F.sigmoid(self.fc2(X))
+		return F.sigmoid(X)
 
 class ConvBlock(nn.Module):
 	def __init__(self, in_channels, out_channels, strides=1):
