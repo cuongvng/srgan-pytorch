@@ -83,19 +83,16 @@ def train(resume_training=True):
 			real_labels = torch.full(size=(len(hr_img),), fill_value=REAL_VALUE, dtype=torch.float, device=device)
 			output_real = D(hr_img).view(-1)
 			err_D_real = criterion_D(output_real, real_labels)
+			err_D_real.backward()
 
 			# Classify all-fake HR images (or SR images)
 			fake_labels = torch.full(size=(len(hr_img),), fill_value=FAKE_VALUE, dtype=torch.float, device=device)
 			sr_img = G(lr_img)
 			output_fake = D(sr_img.detach()).view(-1)
 			err_D_fake = criterion_D(output_fake, fake_labels)
+			err_D_fake.backward()
 
-			err_D = err_D_real + err_D_fake
-			err_D.backward()
 			optimizer_D.step()
-
-			# For logging
-			D_x = output_real.mean().item()
 			D_Gz1 = output_fake.mean().item()
 
 			#### TRAIN G: minimize `log(D(G(z))`
@@ -108,12 +105,14 @@ def train(resume_training=True):
 			optimizer_G.step()
 
 			# Print stats
-			D_Gz2 = output_fake.mean().item()
-			print(f"\terr_D_real: {err_D_real.item():.4f}; err_D_fake: {err_D_fake.item():.4f}; "
-				  f" err_G: {err_G.item():.4f}; D_x: {D_x:.4f}; D_Gz1: {D_Gz1:.4f}; D_Gz2: {D_Gz2:.4f}")
+			if e%10==0:
+				D_x = output_real.mean().item()
+				D_Gz2 = output_fake.mean().item()
+				print(f"\terr_D_real: {err_D_real.item():.4f}; err_D_fake: {err_D_fake.item():.4f}; "
+					  f" err_G: {err_G.item():.4f}; D_x: {D_x:.4f}; D_Gz1: {D_Gz1:.4f}; D_Gz2: {D_Gz2:.4f}")
 
 			## Free up GPU memory
-			del hr_img, lr_img, err_D, err_G, real_labels, fake_labels, output_real, output_fake, sr_img
+			del hr_img, lr_img, err_D_fake, err_D_real, err_G, real_labels, fake_labels, output_real, output_fake, sr_img
 			torch.cuda.empty_cache()
 
 		### Save checkpoints
