@@ -4,6 +4,7 @@ from PIL import Image
 from generator import Generator
 from train import PATH_G, xavier_init_weights, transform_lr
 import os
+import glob
 import sys
 sys.path.append('../')
 from CONFIG import *
@@ -47,4 +48,6 @@ if __name__ == '__main__':
 		G.apply(xavier_init_weights).to(device)
 	G.eval()
 
-	generate_sr("../DIV2K/DIV2K_valid_LR_bicubic/X4/0801x4.png")
+	test_images = sorted(glob.glob("../DIV2K/DIV2K_valid_LR_bicubic/X4/*.png"))
+	for filepath in test_images:
+		generate_sr(filepath)
