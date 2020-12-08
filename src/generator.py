@@ -32,7 +32,7 @@ class Generator(nn.Module):
 		X = self.pixel_shufflers(X)
 		X = self.conv3(X)
 
-		return X
+		return F.tanh(X)
 
 class Residual_Block(nn.Module):
 	def __init__(self, in_channels, out_channels, strides, use_1x1_conv=True):
