@@ -46,8 +46,8 @@ def train(resume_training=True):
 	### Load models
 	G = Generator(n_res_blks=N_RESBLK_G, upscale_factor=UPSCALE).to(device)
 	D = Discriminator().to(device)
-	optimizer_G = optim.Adam(G.parameters(), lr=LR)
-	optimizer_D = optim.Adam(D.parameters(), lr=LR)
+	optimizer_G = optim.Adam(G.parameters(), lr=LR, betas=BETAS)
+	optimizer_D = optim.Adam(D.parameters(), lr=LR, betas=BETAS)
 
 	if resume_training and PATH_G.exists() and PATH_D.exists():
 		G, D, optimizer_G, optimizer_D, prev_epochs = load_checkpoints(G, D, optimizer_G, optimizer_D)
