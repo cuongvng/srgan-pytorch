@@ -67,12 +67,27 @@ def train(resume_training=True):
 	criterion_G = PerceptualLoss(vgg_coef=VGG_LOSS_COEF, adversarial_coef=ADVERSARIAL_LOSS_COEF).to(device)
 	criterion_D = torch.nn.BCELoss()
 
+	## Warm up G
+	for w in range(5):
+		print(f"\nWarmup: {w+1}")
+		for (batch, hr_batch), lr_batch in zip(enumerate(hr_train_loader), lr_train_loader):
+			hr_img, lr_img = hr_batch[0].to(device), lr_batch[0].to(device)
+			optimizer_G.zero_grad()
+
+			sr_img = G(lr_img)
+			output_fake = D(sr_img).view(-1)
+			err_G = criterion_G(sr_img, hr_img, output_fake)
+			err_G.backward()
+
+			optimizer_G.step()
+			if batch % 10 == 0:
+				print(f"\tBatch: {batch + 1}/{len(data_train_hr) // BATCH_SIZE}")
+				print(f"\terr_G: {err_G.item():.4f}")
+
 	for e in range(EPOCHS):
 		print(f"\nEpoch: {e+prev_epochs+1}")
 
 		for (batch, hr_batch), lr_batch in zip(enumerate(hr_train_loader), lr_train_loader):
-			print(f"\tBatch: {batch+1}/{len(data_train_hr)//BATCH_SIZE}")
-
 			# Transfer data to GPU if available
 			hr_img, lr_img = hr_batch[0].to(device), lr_batch[0].to(device)
 
@@ -105,7 +120,8 @@ def train(resume_training=True):
 			optimizer_G.step()
 
 			# Print stats
-			if e%10==0:
+			if batch%10==0:
+				print(f"\tBatch: {batch + 1}/{len(data_train_hr) // BATCH_SIZE}")
 				D_x = output_real.mean().item()
 				D_Gz2 = output_fake.mean().item()
 				print(f"\terr_D_real: {err_D_real.item():.4f}; err_D_fake: {err_D_fake.item():.4f}; "
