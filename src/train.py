@@ -52,6 +52,7 @@ def train(resume_training=True):
 	if resume_training and PATH_G.exists() and PATH_D.exists():
 		G, D, optimizer_G, optimizer_D, prev_epochs = load_checkpoints(G, D, optimizer_G, optimizer_D)
 		print("Continue training from previous checkpoints ...")
+		warmup = False
 	else:
 		G.apply(xavier_init_weights)
 		D.apply(xavier_init_weights)
@@ -59,6 +60,7 @@ def train(resume_training=True):
 		summary(G, input_size=(3, LR_CROPPED_SIZE, LR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
 		summary(D, input_size=(3, HR_CROPPED_SIZE, HR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
 		print("Training from start ...")
+		warmup = True
 
 	### Train
 	G.train()
@@ -68,21 +70,22 @@ def train(resume_training=True):
 	criterion_D = torch.nn.BCELoss()
 
 	## Warm up G
-	for w in range(5):
-		print(f"\nWarmup: {w+1}")
-		for (batch, hr_batch), lr_batch in zip(enumerate(hr_train_loader), lr_train_loader):
-			hr_img, lr_img = hr_batch[0].to(device), lr_batch[0].to(device)
-			optimizer_G.zero_grad()
+	if warmup:
+		for w in range(10):
+			print(f"\nWarmup: {w+1}")
+			for (batch, hr_batch), lr_batch in zip(enumerate(hr_train_loader), lr_train_loader):
+				hr_img, lr_img = hr_batch[0].to(device), lr_batch[0].to(device)
+				optimizer_G.zero_grad()
 
-			sr_img = G(lr_img)
-			output_fake = D(sr_img).view(-1)
-			err_G = criterion_G(sr_img, hr_img, output_fake)
-			err_G.backward()
+				sr_img = G(lr_img)
+				output_fake = D(sr_img).view(-1)
+				err_G = criterion_G(sr_img, hr_img, output_fake)
+				err_G.backward()
 
-			optimizer_G.step()
-			if batch % 10 == 0:
-				print(f"\tBatch: {batch + 1}/{len(data_train_hr) // BATCH_SIZE}")
-				print(f"\terr_G: {err_G.item():.4f}")
+				optimizer_G.step()
+				if batch % 10 == 0:
+					print(f"\tBatch: {batch + 1}/{len(data_train_hr) // BATCH_SIZE}")
+					print(f"\terr_G: {err_G.item():.4f}")
 
 	for e in range(EPOCHS):
 		print(f"\nEpoch: {e+prev_epochs+1}")
