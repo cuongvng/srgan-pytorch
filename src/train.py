@@ -109,8 +109,8 @@ def train(resume_training=True):
 
 			# Print stats
 			D_Gz2 = output_fake.mean().item()
-			print(f"\terr_D: {err_D.item():.4f}; err_G: {err_G.item():.4f}; D_x: {D_x:.4f}; "
-				  f"D_Gz1: {D_Gz1:.4f}; D_Gz2: {D_Gz2:.4f}")
+			print(f"\terr_D_real: {err_D_real.item():.4f}; err_D_fake: {err_D_fake.item():.4f}; "
+				  f" err_G: {err_G.item():.4f}; D_x: {D_x:.4f}; D_Gz1: {D_Gz1:.4f}; D_Gz2: {D_Gz2:.4f}")
 
 			## Free up GPU memory
 			del hr_img, lr_img, err_D, err_G, real_labels, fake_labels, output_real, output_fake, sr_img
