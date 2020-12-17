@@ -8,6 +8,8 @@ import glob
 import sys
 sys.path.append('../')
 from CONFIG import *
+import argparse
+from pathlib import Path
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 SR_DIR = "../sr_img"
@@ -37,6 +39,11 @@ if __name__ == '__main__':
 	except FileExistsError:
 		pass
 
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--filepath", type=Path)
+	p = parser.parse_args()
+	assert p.filepath.exists(), "No such file!"
+
 	# Load checkpoints
 	G = Generator(n_res_blks=N_RESBLK_G, upscale_factor=UPSCALE)
 	if PATH_G.exists():
@@ -48,6 +55,4 @@ if __name__ == '__main__':
 		G.apply(xavier_init_weights).to(device)
 	G.eval()
 
-	test_images = sorted(glob.glob("../DIV2K/DIV2K_valid_LR_bicubic/X4/*.png"))
-	for filepath in test_images:
-		generate_sr(filepath)
+	generate_sr(p.filepath)
