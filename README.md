@@ -81,7 +81,7 @@ python gen_sr.py --filepath "path_to_your_image_file.png"
 
 ## 4. Results
 
-| High Resolution images      | Generated Super Resolution images |
+| Original High Resolution images      | GAN-Generated Super Resolution images |
 | --------------------------- | --------------------------------- |
 | ![](examples/0801.png)      | ![](examples/sr_0801x4.png)       |
 | ![](examples/0838.png)      | ![](examples/sr_0838x4.png)       |
