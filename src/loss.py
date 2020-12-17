@@ -17,4 +17,4 @@ class PerceptualLoss(nn.Module):
 		adversarial_loss = torch.mean(1-output_labels)
 		vgg_loss = self.euclidean_distance(self.vgg19(sr_img), self.vgg19(hr_img))
 		pixel_loss = self.euclidean_distance(sr_img, hr_img)
-		return pixel_loss + self.adversarial_coef*adversarial_loss + self.vgg_coef*vgg_loss
+		return pixel_loss, self.adversarial_coef*adversarial_loss, self.vgg_coef*vgg_loss
