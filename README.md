@@ -26,6 +26,7 @@ In this repo, I used the [DIV2K dataset](https://data.vision.ee.ethz.ch/cvl/), w
 │   └── DIV2K_valid_LR_bicubic
 │       └── X4
 ├── README.md
+├── examples
 ├── requirements.txt
 ├── setup_remote.sh
 ├── src
@@ -48,8 +49,8 @@ In this repo, I used the [DIV2K dataset](https://data.vision.ee.ethz.ch/cvl/), w
     - `DIV2K_train_LR_bicubic/X4`: 800 LR training images
     - `DIV2K_valid_HR`: 200 HR test images
     - `DIV2K_valid_LR_bicubic/X4`: 200 LR test images
-- `setup_remote.sh`: You can setup this repo (including data download, python package installation, etc.) on your local machine or a remote server (Colab recommended) 
-for faster training by executing the bash commands in this file.
+- `setup_remote.sh`: You can setup this repo (including data download, python package installation, etc.) on your local machine or a remote server (Colab recommended) for faster training by executing the bash commands in this file.
+- `examples`: contains some results on the test dataset.
 - `src`:
     - `dataset.py`: custom torch dataset for DIV2K
     - `loss.py`: loss functions for generator
