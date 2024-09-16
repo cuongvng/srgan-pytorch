@@ -3,7 +3,7 @@ import numpy as np
 from glob import glob
 import dippykit as dip
 from dippykit.sampling import resample
-from dippykit.metrics import PSNR, SSIM
+from dippykit.metrics import PSNR
 
 sys.path.append('/content/gdrive/MyDrive/DIP/')
 from CONFIG import VAL_HR_DIR, VAL_LR_DIR, UPSCALE
