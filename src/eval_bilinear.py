@@ -3,7 +3,7 @@ import numpy as np
 from glob import glob
 import dippykit as dip
 from dippykit.sampling import resample
-from dippykit.metrics import PSNR, SSIM
+from dippykit.metrics import PSNR
 
 sys.path.append('/content/gdrive/MyDrive/DIP/')
 from CONFIG import VAL_HR_DIR, VAL_LR_DIR, UPSCALE
@@ -15,7 +15,6 @@ def eval_bilinear():
 					[0, 1.0/UPSCALE]])
 
 	psnr_result = []
-	ssim_result = []
 
 	lr_imgs = glob(f"{VAL_LR_DIR}/*.png")
 	for lr_path in lr_imgs:
@@ -35,7 +34,6 @@ def eval_bilinear():
 		psnr_ = PSNR(y, hr, max_signal_value=1.0)
 		ssim_, _ = SSIM(y, hr, multichannel=True)
 		psnr_result.append(psnr_)
-		ssim_result.append(ssim_)
 
 		print("psnr", file_name, psnr_)
 		print("ssim", file_name, ssim_)
@@ -45,11 +43,7 @@ def eval_bilinear():
 	print("Min PSNR:", np.min(psnr_result))
 	print("Max PSNR:", np.max(psnr_result))
 
-	print("\nMean SSIM:", np.mean(ssim_result))
-	print("STD SSIM:", np.std(ssim_result))
-	print("Min SSIM:", np.min(ssim_result))
-	print("Max SSIM:", np.max(ssim_result))
-
+	# Remove ssnr from metrics
 
 if __name__ == "__main__":
 	eval_bilinear()

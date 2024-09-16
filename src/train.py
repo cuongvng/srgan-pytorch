@@ -33,10 +33,10 @@ transform_lr = trf.Compose([
 ])
 
 def train(resume_training=True):
-	'''
-	:param `resume_training`: whether to continue training from previous checkpoint or not.
-	If checkpoints cannot be found, train from beginning, regardless of `resume_training`.
-	'''
+	# '''
+	# :param `resume_training`: whether to continue training from previous checkpoint or not.
+	# If checkpoints cannot be found, train from beginning, regardless of `resume_training`.
+	# '''
 	### Load data
 	data_train_hr, data_train_lr = load_training_data()
 	hr_train_loader = DataLoader(dataset=data_train_hr, shuffle=False, batch_size=BATCH_SIZE, drop_last=False)
@@ -59,7 +59,6 @@ def train(resume_training=True):
 		prev_epochs = 0
 		summary(G, input_size=(3, LR_CROPPED_SIZE, LR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
 		summary(D, input_size=(3, HR_CROPPED_SIZE, HR_CROPPED_SIZE), batch_size=BATCH_SIZE, device=str(device))
-		print("Training from start ...")
 		warmup = True
 
 	### Train
@@ -70,22 +69,6 @@ def train(resume_training=True):
 	warmup_loss = torch.nn.L1Loss()
 	criterion_D = torch.nn.BCELoss()
 
-	## Warm up G
-	if warmup:
-		for w in range(WARMUP_EPOCHS):
-			print(f"\nWarmup: {w+1}")
-			for (batch, hr_batch), lr_batch in zip(enumerate(hr_train_loader), lr_train_loader):
-				hr_img, lr_img = hr_batch[0].to(device), lr_batch[0].to(device)
-				optimizer_G.zero_grad()
-
-				sr_img = G(lr_img)
-				err_G = warmup_loss(sr_img, hr_img)
-				err_G.backward()
-
-				optimizer_G.step()
-				if batch % 10 == 0:
-					print(f"\tBatch: {batch + 1}/{len(data_train_hr) // BATCH_SIZE}")
-					print(f"\tMAE G: {err_G.item():.4f}")
 
 	for e in range(EPOCHS):
 		print(f"\nEpoch: {e+prev_epochs+1}")
