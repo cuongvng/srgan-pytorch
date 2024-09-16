@@ -43,11 +43,7 @@ def eval_bilinear():
 	print("Min PSNR:", np.min(psnr_result))
 	print("Max PSNR:", np.max(psnr_result))
 
-	print("\nMean SSIM:", np.mean(ssim_result))
-	print("STD SSIM:", np.std(ssim_result))
-	print("Min SSIM:", np.min(ssim_result))
-	print("Max SSIM:", np.max(ssim_result))
-
+	# Remove ssnr from metrics
 
 if __name__ == "__main__":
 	eval_bilinear()
