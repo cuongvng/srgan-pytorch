@@ -8,8 +8,6 @@ import glob
 import sys
 sys.path.append('/content/gdrive/MyDrive/DIP/')
 from CONFIG import *
-import argparse
-from pathlib import Path
 from glob import glob
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -50,15 +48,6 @@ def gen_sr_valset():
 		tensor_to_img(sr_img, sr_img_path)
 
 if __name__ == '__main__':
-	# try:
-	# 	os.mkdir(SR_DIR)
-	# except FileExistsError:
-	# 	pass
-
-	# parser = argparse.ArgumentParser()
-	# parser.add_argument("--filepath", type=Path)
-	# p = parser.parse_args()
-	# assert p.filepath.exists(), "No such file!"
 
 	# Load checkpoints
 	G = Generator(n_res_blks=N_RESBLK_G, upscale_factor=UPSCALE)

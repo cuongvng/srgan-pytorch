@@ -15,10 +15,6 @@ class Generator(nn.Module):
 		self.conv2 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding=1)
 		self.bn = nn.BatchNorm2d(64)
 
-		self.pixel_shufflers = nn.Sequential()
-		for i in range(int(np.log2(upscale_factor))):
-			self.pixel_shufflers.add_module(f"pixel_shuffle_blk_{i}",
-											PixelShufflerBlock(in_channels=64, upscale_factor=2))
 		self.conv3 = nn.Conv2d(in_channels=64, out_channels=3, kernel_size=9, padding=4)
 
 	def forward(self, X):
