@@ -15,7 +15,6 @@ def eval_bilinear():
 					[0, 1.0/UPSCALE]])
 
 	psnr_result = []
-	ssim_result = []
 
 	lr_imgs = glob(f"{VAL_LR_DIR}/*.png")
 	for lr_path in lr_imgs:
@@ -35,7 +34,6 @@ def eval_bilinear():
 		psnr_ = PSNR(y, hr, max_signal_value=1.0)
 		ssim_, _ = SSIM(y, hr, multichannel=True)
 		psnr_result.append(psnr_)
-		ssim_result.append(ssim_)
 
 		print("psnr", file_name, psnr_)
 		print("ssim", file_name, ssim_)
